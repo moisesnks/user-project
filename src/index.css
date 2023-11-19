@@ -1,0 +1,9 @@
+/* src/index.css */
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #333;
+  background-color: #f7f8fa;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}

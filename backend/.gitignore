@@ -1,0 +1,18 @@
+# Archivos y carpetas generados por Go
+/bin/
+/pkg/
+/vendor/
+
+# Archivos ejecutables
+*.exe
+*.out
+
+# Archivos de respaldo y temporales
+*.bak
+*.swp
+*.swo
+*.log
+
+# Carpetas de dependencias de Go
+/go.sum
+/go.mod

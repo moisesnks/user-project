@@ -1,0 +1,63 @@
+/* src/components/LoginForm/LoginRegisterForm.css */
+.login-register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(45deg, #4a90e2, #007acc);
+}
+
+.login-register-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+    background-color: #fff;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin: 1rem;
+}
+
+/* estilos para el slider del botón */
+.slide-button-container {
+    display: flex;
+    justify-content: space-between;
+    width: 300px;
+    /* Ancho total del contenedor de botones */
+    background: transparent;
+    /* Fondo transparente */
+    border: 1px solid #dfe1e5;
+    /* Borde de 1px negro para el contenedor */
+    border-radius: 8px;
+    /* Borde redondeado para el contenedor */
+    margin: 0 auto;
+    margin-bottom: 1rem;
+}
+
+.slide-button {
+    flex: 1;
+    text-align: center;
+    padding: 0.75rem;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.3s, background 0.3s, color 0.3s, font-weight 0.3s;
+    font-weight: 600;
+    /* Peso de fuente normal */
+}
+
+
+.slide-button.active:nth-child(1) {
+    background: linear-gradient(45deg, #3c34a8, #1a73e8);
+    color: #ffff;
+    font-weight: 600;
+    border-radius: 8px 0px 0px 8px;
+    /* Borde redondeado en la esquina izquierda para "Login" */
+}
+
+.slide-button.active:nth-child(2) {
+    background: linear-gradient(45deg, #34a844, #77e81a);
+    color: #ffff;
+    font-weight: 600;
+    border-radius: 0px 8px 8px 0px;
+    /* Borde redondeado en la esquina derecha para "Signup" */
+}

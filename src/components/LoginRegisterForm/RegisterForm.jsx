@@ -1,10 +1,12 @@
-// src/components/LoginForm/LoginForm.jsx
+// src/components/LoginForm/RegisterForm.jsx
 import React from 'react';
+import './RegisterForm.css'; // Asegúrate de que esta ruta es correcta
 
-const LoginForm = ({ onLogin, onChange, email, password }) => {
+const RegisterForm = ({ onRegister, onChange, email, password }) => {
     return (
-        <form onSubmit={(e) => onLogin(e, email, password)}>
+        <form className="register-form" onSubmit={(e) => onRegister(e, email, password)}>
             <input
+                className="register-input"
                 type="email"
                 name="email"
                 value={email}
@@ -12,16 +14,16 @@ const LoginForm = ({ onLogin, onChange, email, password }) => {
                 placeholder="Email Address"
             />
             <input
+                className="register-input"
                 type="password"
                 name="password"
                 value={password}
                 onChange={onChange}
                 placeholder="Password"
             />
-            <a href="#" className="link">Forgot password?</a>
-            <button type="submit">Login</button>
+            <button className="register-button" type="submit">Signup</button>
         </form>
     );
 };
 
-export default LoginForm;
+export default RegisterForm;

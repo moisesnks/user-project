@@ -1,4 +1,4 @@
-// src/context/AuthContext/index.jsx
+// src/context/AuthContext.jsx
 import React, { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext(null);
@@ -17,10 +17,15 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
-    // Añade más funciones como registro, recuperación de contraseña, etc.
+    const register = (email, password) => {
+        // Aquí deberías añadir la lógica para registrar un nuevo usuario.
+        // Por ejemplo, podrías llamar a una API para crear una cuenta y luego iniciar sesión automáticamente.
+        const userData = { email }; // Simulación de datos de usuario registrado
+        setUser(userData);
+    };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={{ user, login, logout, register }}>
             {children}
         </AuthContext.Provider>
     );

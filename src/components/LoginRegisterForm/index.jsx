@@ -3,12 +3,17 @@ import React, { useState } from 'react';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
 import { useAuth } from '../../context/AuthContext';
+import './LoginRegisterForm.css'; // Importación de estilos
 
 const LoginRegisterForm = () => {
     const [isLoginView, setIsLoginView] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { login, register } = useAuth();
+
+    const handleButtonClick = () => {
+        setIsLoginView(!isLoginView);
+    };
 
     const handleSubmit = (e, email, password) => {
         e.preventDefault();
@@ -29,11 +34,21 @@ const LoginRegisterForm = () => {
     };
 
     return (
-        <div className="login-container">
-            <div className="login-card">
-                <div className="toggle-buttons">
-                    <button className={`toggle-button ${isLoginView ? 'active' : ''}`} onClick={() => setIsLoginView(true)}>Login</button>
-                    <button className={`toggle-button ${!isLoginView ? 'active' : ''}`} onClick={() => setIsLoginView(false)}>Signup</button>
+        <div className="login-register-container">
+            <div className="login-register-card">
+                <div className="slide-button-container">
+                    <button
+                        className={`slide-button ${isLoginView ? 'active' : ''}`}
+                        onClick={handleButtonClick}
+                    >
+                        Login
+                    </button>
+                    <button
+                        className={`slide-button ${!isLoginView ? 'active' : ''}`}
+                        onClick={handleButtonClick}
+                    >
+                        Signup
+                    </button>
                 </div>
                 {isLoginView ? (
                     <LoginForm onLogin={handleSubmit} onChange={handleChange} email={email} password={password} />

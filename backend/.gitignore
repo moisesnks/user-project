@@ -18,5 +18,5 @@
 /go.mod
 
 .env
-crendentials.json
+credentials.json
 

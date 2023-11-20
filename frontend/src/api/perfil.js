@@ -12,14 +12,15 @@ const ObtenerInfoPerfil = async (token, navigate) => {
 
     try {
         // Realiza la solicitud al servidor
-        const response = await fetch('http://localhost:8080/auth/user/info', requestOptions);
+        const response = await fetch('http://localhost:8080/user/info', requestOptions);
 
         if (response.ok) {
             // La solicitud fue exitosa, obtén la información del usuario como JSON
             const userData = await response.json();
+            console.log(userData);
 
             // Redirige a la vista de perfil y pasa los datos del usuario como estado
-            // navigate('/perfil', { state: { userData } });
+            navigate('/profile', { state: { userData } });
         } else {
             console.error('Error al obtener la información del usuario');
         }

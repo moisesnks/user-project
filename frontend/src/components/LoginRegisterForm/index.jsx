@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom'; // Importa useNavigate desde 'react-router-dom'
 import './LoginRegisterForm.css'; // Importación de estilos
 
 import ObtenerInfoPerfil from '../../api/perfil';
@@ -11,6 +12,7 @@ const LoginRegisterForm = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { login, register, getToken } = useAuth();
+    const navigate = useNavigate(); // Obtiene la función navigate
 
     const handleButtonClick = () => {
         setIsLoginView(!isLoginView);
@@ -27,8 +29,8 @@ const LoginRegisterForm = () => {
         // Después del incio de sesión o registro, obtener el token
         const token = getToken();
 
-        // Llama a ObtenerInfoPerfil pasando el token
-        ObtenerInfoPerfil(token);
+        // Llama a ObtenerInfoPerfil pasando el token y la función navigate
+        ObtenerInfoPerfil(token, navigate);
     };
 
     const handleChange = (e) => {

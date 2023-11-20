@@ -11,8 +11,14 @@ import (
 
 // User representa la estructura de datos del usuario.
 type User struct {
-	UID   string
-	Email string
+	ID              string
+	Nombre          string
+	Apellido        string
+	SegundoApellido string
+	Email           string
+	Rut             string
+	Fono            string
+	ImgProfile      string
 }
 
 // AuthService proporciona servicios relacionados con la autenticación y autorización.
@@ -33,7 +39,7 @@ func NewAuthService(firebaseAuthClient *auth.Client, db *sql.DB) *AuthService {
 func (s *AuthService) RegisterUser(uid, email string) error {
 	// Verificar si el usuario ya está registrado en la base de datos
 	var existingUID string
-	err := s.DB.QueryRow("SELECT uid FROM users WHERE uid = $1", uid).Scan(&existingUID)
+	err := s.DB.QueryRow("SELECT id FROM usuario WHERE id = $1", uid).Scan(&existingUID)
 	if err == nil {
 		// El usuario ya existe en la base de datos
 		return errors.New("El usuario ya está registrado")
@@ -43,7 +49,7 @@ func (s *AuthService) RegisterUser(uid, email string) error {
 	}
 
 	// Insertar el usuario en la base de datos
-	_, err = s.DB.Exec("INSERT INTO users (uid, email) VALUES ($1, $2)", uid, email)
+	_, err = s.DB.Exec("INSERT INTO usuario (id, correo) VALUES ($1, $2)", uid, email)
 	if err != nil {
 		// Ocurrió un error al insertar el usuario en la base de datos
 		return err

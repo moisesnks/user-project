@@ -1,27 +1,34 @@
-// src/components/LoginForm/index.jsx
 import React, { useState } from 'react';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
 import { useAuth } from '../../context/AuthContext';
 import './LoginRegisterForm.css'; // Importación de estilos
 
+import ObtenerInfoPerfil from '../../api/perfil';
+
 const LoginRegisterForm = () => {
     const [isLoginView, setIsLoginView] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { login, register } = useAuth();
+    const { login, register, getToken } = useAuth();
 
     const handleButtonClick = () => {
         setIsLoginView(!isLoginView);
     };
 
-    const handleSubmit = (e, email, password) => {
+    const handleSubmit = async (e, email, password) => {
         e.preventDefault();
         if (isLoginView) {
-            login(email, password);
+            await login(email, password); // Espera a que se complete el inicio de sesión
         } else {
-            register(email, password);
+            await register(email, password); // Espera a que se complete el registro
         }
+
+        // Después del incio de sesión o registro, obtener el token
+        const token = getToken();
+
+        // Llama a ObtenerInfoPerfil pasando el token
+        ObtenerInfoPerfil(token);
     };
 
     const handleChange = (e) => {

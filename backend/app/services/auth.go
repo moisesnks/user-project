@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"firebase.google.com/go/auth"
-	_ "github.com/lib/pq"
 )
 
 // User representa la estructura de datos del usuario.
@@ -62,6 +62,7 @@ func (s *AuthService) RegisterUser(uid, email string) error {
 func (s *AuthService) ValidateJWT(jwtToken string) (bool, error) {
 	// Verificar y decodificar el token JWT utilizando la SDK de Firebase Admin
 	token, err := s.FirebaseAuthClient.VerifyIDToken(context.Background(), jwtToken)
+
 	if err != nil {
 		return false, err
 	}
@@ -72,20 +73,39 @@ func (s *AuthService) ValidateJWT(jwtToken string) (bool, error) {
 	return true, nil
 }
 
-// VerifyAndExtractUserID verifica el token JWT y extrae el UID del usuario si el token es válido.
-func (s *AuthService) VerifyAndExtractUserID(jwtToken string) (string, error) {
-	// Verificar y decodificar el token JWT utilizando la SDK de Firebase Admin
-	token, err := s.FirebaseAuthClient.VerifyIDToken(context.Background(), jwtToken)
+// GetUserInfoByID obtiene la información del usuario por su ID y la filtra para mostrar solo los campos deseados.
+func (s *AuthService) GetUserInfoByID(userID string) (map[string]interface{}, error) {
+	user, err := s.FirebaseAuthClient.GetUser(context.Background(), userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Crear un objeto JSON con la información filtrada
+	userData := map[string]interface{}{
+		"email":         user.Email,
+		"EmailVerified": user.EmailVerified,
+		"UserMetadata": map[string]interface{}{
+			"CreationTimestamp":  time.Unix(user.UserMetadata.CreationTimestamp/1000, 0).Format("02 de enero de 2006"),
+			"LastLogInTimestamp": time.Unix(user.UserMetadata.LastLogInTimestamp/1000, 0).Format("02 de enero de 2006"),
+		},
+		"TenantID": user.TenantID,
+	}
+
+	return userData, nil
+}
+
+func (s *AuthService) ExtractUserIDFromToken(token string) (string, error) {
+	// Realiza la verificación del token JWT
+	strToken, err := s.FirebaseAuthClient.VerifyIDToken(context.Background(), token)
 	if err != nil {
 		return "", err
 	}
 
-	// Extraer el UID del token JWT (puede variar según la estructura del token)
-	uid, ok := token.Claims["sub"].(string)
-	if !ok || uid == "" {
-		return "", errors.New("UID no encontrado en el token JWT")
+	// Extraer el user_id del token JWT
+	user_id, ok := strToken.Claims["user_id"].(string)
+	if !ok || user_id == "" {
+		return "", errors.New("user_id no encontrado en el token JWT")
 	}
 
-	// Verificación exitosa, devuelve el UID del usuario
-	return uid, nil
+	return user_id, nil
 }

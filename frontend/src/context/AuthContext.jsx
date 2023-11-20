@@ -35,9 +35,8 @@ export const AuthProvider = ({ children }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ token }) // Envia el token JWT como objeto
+                    'Authorization': `${token}` // No se utiliza el prefijo "Bearer" aquí
+                }
             });
 
             if (response.ok) {

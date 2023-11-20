@@ -37,20 +37,10 @@ func ConfigureRegisterRoute(router *gin.Engine, authService *services.AuthServic
 // ConfigureLoginRoute configura la ruta de inicio de sesión
 func ConfigureLoginRoute(router *gin.Engine, authService *services.AuthService) {
 	router.POST("/auth/login", func(c *gin.Context) {
-		var requestBody map[string]interface{}
-
-		// Leer el cuerpo de la solicitud como un mapa sin procesar
-		if err := c.BindJSON(&requestBody); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "JSON no válido"})
-			fmt.Println("Error al parsear el JSON desde el cuerpo de la solicitud:", err)
-			return
-		}
-
-		// Por ejemplo, para acceder a un campo específico:
-		token, ok := requestBody["token"].(string)
-		if !ok {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Token JWT no válido"})
-			fmt.Println("Token JWT no encontrado en el cuerpo de la solicitud")
+		// Verificar el token JWT en el encabezado de autorización
+		token := c.GetHeader("Authorization")
+		if token == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token JWT no proporcionado en el encabezado de autorización"})
 			return
 		}
 
@@ -67,7 +57,6 @@ func ConfigureLoginRoute(router *gin.Engine, authService *services.AuthService) 
 		if isValid {
 			// Enviar una respuesta HTTP 200 con un mensaje de éxito
 			c.JSON(http.StatusOK, gin.H{"message": "Inicio de sesión exitoso"})
-			return
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token JWT no válido"})
 		}

@@ -22,15 +22,16 @@ const LoginRegisterForm = () => {
         e.preventDefault();
         if (isLoginView) {
             await login(email, password); // Espera a que se complete el inicio de sesión
+            // Después del incio de sesión o registro, obtener el token
+            const token = getToken();
+
+            // Llama a ObtenerInfoPerfil pasando el token y la función navigate
+            ObtenerInfoPerfil(token, navigate);
         } else {
             await register(email, password); // Espera a que se complete el registro
         }
 
-        // Después del incio de sesión o registro, obtener el token
-        const token = getToken();
 
-        // Llama a ObtenerInfoPerfil pasando el token y la función navigate
-        ObtenerInfoPerfil(token, navigate);
     };
 
     const handleChange = (e) => {

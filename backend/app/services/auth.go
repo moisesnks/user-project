@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 	"time"
 
 	"firebase.google.com/go/auth"
@@ -35,26 +36,29 @@ func NewAuthService(firebaseAuthClient *auth.Client, db *sql.DB) *AuthService {
 	}
 }
 
-// RegisterUser registra un usuario en la base de datos con UID y correo.
 func (s *AuthService) RegisterUser(uid, email string) error {
+	log.Println("Inicio de RegisterUser")
+
 	// Verificar si el usuario ya está registrado en la base de datos
 	var existingUID string
 	err := s.DB.QueryRow("SELECT id FROM usuario WHERE id = $1", uid).Scan(&existingUID)
 	if err == nil {
-		// El usuario ya existe en la base de datos
+		log.Printf("El usuario con UID %s ya está registrado\n", uid)
 		return errors.New("El usuario ya está registrado")
 	} else if err != sql.ErrNoRows {
-		// Ocurrió un error al consultar la base de datos
+		log.Printf("Error al verificar el usuario existente: %v\n", err)
 		return err
 	}
+	log.Println("El usuario no está registrado, procediendo a la inserción")
 
 	// Insertar el usuario en la base de datos
-	_, err = s.DB.Exec("INSERT INTO usuario (id, correo) VALUES ($1, $2)", uid, email)
+	_, err = s.DB.Exec("INSERT INTO usuario (id, email) VALUES ($1, $2)", uid, email)
 	if err != nil {
-		// Ocurrió un error al insertar el usuario en la base de datos
+		log.Printf("Error al insertar el usuario: %v\n", err)
 		return err
 	}
 
+	log.Println("Usuario registrado con éxito")
 	return nil
 }
 

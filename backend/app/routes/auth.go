@@ -1,15 +1,18 @@
+// routes.go
+
 package routes
 
 import (
 	"backend/app/services"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func ConfigureAuthRoutes(router *gin.RouterGroup, authService *services.AuthService) {
-	// Ruta de registro que llama al servicio RegisterUser
-	router.POST("/register", func(c *gin.Context) {
+// ConfigureRegisterRoute configura la ruta de registro
+func ConfigureRegisterRoute(router *gin.Engine, authService *services.AuthService) {
+	router.POST("/auth/register", func(c *gin.Context) {
 		var userData struct {
 			UID   string `json:"uid"`
 			Email string `json:"email"`
@@ -29,29 +32,42 @@ func ConfigureAuthRoutes(router *gin.RouterGroup, authService *services.AuthServ
 
 		c.JSON(http.StatusOK, gin.H{"message": "Usuario registrado correctamente"})
 	})
+}
 
-	// Ruta de inicio de sesión que valida un token JWT y redirige al usuario
-	router.POST("/login", func(c *gin.Context) {
-		var jwtData struct {
-			Token string `json:"token"`
+// ConfigureLoginRoute configura la ruta de inicio de sesión
+func ConfigureLoginRoute(router *gin.Engine, authService *services.AuthService) {
+	router.POST("/auth/login", func(c *gin.Context) {
+		var requestBody map[string]interface{}
+
+		// Leer el cuerpo de la solicitud como un mapa sin procesar
+		if err := c.BindJSON(&requestBody); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "JSON no válido"})
+			fmt.Println("Error al parsear el JSON desde el cuerpo de la solicitud:", err)
+			return
 		}
 
-		// Parsear el token JWT desde el cuerpo de la solicitud
-		if err := c.BindJSON(&jwtData); err != nil {
+		// Por ejemplo, para acceder a un campo específico:
+		token, ok := requestBody["token"].(string)
+		if !ok {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Token JWT no válido"})
+			fmt.Println("Token JWT no encontrado en el cuerpo de la solicitud")
 			return
 		}
 
 		// Validar el token JWT utilizando el servicio de autenticación
-		isValid, err := authService.ValidateJWT(jwtData.Token)
+		isValid, err := authService.ValidateJWT(token)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al validar el token JWT"})
+			fmt.Println("Error al validar el token JWT:", err)
 			return
 		}
 
+		fmt.Println("Token JWT is ", isValid)
+
 		if isValid {
-			// Redirigir al usuario a la página de Google (personaliza la URL según tus necesidades)
-			c.Redirect(http.StatusSeeOther, "https://www.google.cl")
+			// Enviar una respuesta HTTP 200 con un mensaje de éxito
+			c.JSON(http.StatusOK, gin.H{"message": "Inicio de sesión exitoso"})
+			return
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token JWT no válido"})
 		}

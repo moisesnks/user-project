@@ -1,18 +1,29 @@
+// app/middleware/logging.go
+
 package middleware
 
 import (
-	"log"
-	"net/http"
+	"fmt"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
-func LoggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
+func LoggingMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Registra información sobre la solicitud
+		startTime := time.Now()
+		requestMethod := c.Request.Method
+		requestPath := c.Request.URL.Path
 
-		next.ServeHTTP(w, r)
+		// Llama al siguiente manejador en la cadena
+		c.Next()
 
-		duration := time.Since(start)
-		log.Printf("[%s] %s %s %v\n", r.Method, r.URL.Path, r.RemoteAddr, duration)
-	})
+		// Registra información sobre la respuesta
+		endTime := time.Now()
+		latency := endTime.Sub(startTime)
+
+		// Registra la información en el formato deseado (puedes personalizarlo)
+		fmt.Printf("%s %s %v\n", requestMethod, requestPath, latency)
+	}
 }

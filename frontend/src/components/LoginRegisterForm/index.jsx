@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
-import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom'; // Importa useNavigate desde 'react-router-dom'
-import './LoginRegisterForm.css'; // Importación de estilos
+import './LoginRegisterForm.css';
 
 import ObtenerInfoPerfil from '../../api/perfil';
 
@@ -12,26 +12,27 @@ const LoginRegisterForm = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { login, register, getToken } = useAuth();
-    const navigate = useNavigate(); // Obtiene la función navigate
+    const navigate = useNavigate();
+
+    // UseEffect para manejar la navegación después del cambio de token
+    useEffect(() => {
+        const token = getToken();
+        if (token) {
+            ObtenerInfoPerfil(token, navigate);
+        }
+    }, [getToken, navigate]);
 
     const handleButtonClick = () => {
         setIsLoginView(!isLoginView);
     };
 
-    const handleSubmit = async (e, email, password) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (isLoginView) {
-            await login(email, password); // Espera a que se complete el inicio de sesión
-            // Después del incio de sesión o registro, obtener el token
-            const token = getToken();
-
-            // Llama a ObtenerInfoPerfil pasando el token y la función navigate
-            ObtenerInfoPerfil(token, navigate);
+            await login(email, password);
         } else {
-            await register(email, password); // Espera a que se complete el registro
+            await register(email, password);
         }
-
-
     };
 
     const handleChange = (e) => {

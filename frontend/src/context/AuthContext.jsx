@@ -1,32 +1,32 @@
-// src/context/AuthContext.jsx
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth } from '../../firebase';
 import { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
-
-import ObtenerInfoPerfil from '../api/perfil';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
-    const [uid, setUid] = useState(null);
-
 
     // Función de inicio de sesión que llama a 'signInWithEmailAndPassword' de Firebase Auth
     const login = async (email, password) => {
+        console.log('Iniciando sesión...', email, password)
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const token = await userCredential.user.getIdToken(); // Obtén el token JWT
-            setToken(token);
-
-            // Llamar a la función del backend después del inicio de sesión exitoso
-            await loginOnBackend(token);
-
+            const newToken = await userCredential.user.getIdToken(); // Obtén el token JWT
+            setToken(newToken);
+            setUser(userCredential.user); // Actualiza el estado del usuario
         } catch (error) {
             console.error('Error al iniciar sesión:', error.message);
         }
     };
+
+    // UseEffect para manejar acciones después de actualizar el token
+    useEffect(() => {
+        if (token) {
+            loginOnBackend(token);
+        }
+    }, [token]); // Se ejecuta cuando el token cambia
 
     // Función para enviar la solicitud de inicio de sesión al backend
     const loginOnBackend = async (token) => {
@@ -35,13 +35,12 @@ export const AuthProvider = ({ children }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `${token}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ token }) // Envia el token JWT como objeto
             });
 
             if (response.ok) {
-                // Procesar la respuesta del backend
                 const data = await response.json();
                 console.log('Respuesta del backend después del inicio de sesión:', data);
             } else {
@@ -55,8 +54,9 @@ export const AuthProvider = ({ children }) => {
     // Función de cierre de sesión
     const logout = async () => {
         try {
-            await signOut(auth); // Utiliza la función signOut para cerrar la sesión
-            setUser(null);
+            await signOut(auth);
+            setToken(null); // Limpia el token
+            setUser(null); // Limpia el usuario
         } catch (error) {
             console.error('Error al cerrar sesión:', error.message);
         }
@@ -66,18 +66,10 @@ export const AuthProvider = ({ children }) => {
     const register = async (email, password) => {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const userData = userCredential.user;
-            setUser(userData);
-
-            // Obtener el UID del usuario registrado
-            const uid = userData.uid;
-            setUid(uid);
-
-            // Llamar a la función del backend después del registro exitoso
-            await registerOnBackend(email, uid);
-
-            // Después del registro, inicia sesión automáticamente
-            await login(email, password);
+            const uid = userCredential.user.uid;
+            setUser(userCredential.user); // Actualiza el estado del usuario
+            await registerOnBackend(email, uid); // Llama a registerOnBackend con el email y uid
+            await login(email, password); // Inicia sesión después de registrar
         } catch (error) {
             console.error('Error al registrar usuario:', error.message);
         }
@@ -100,12 +92,9 @@ export const AuthProvider = ({ children }) => {
             });
 
             if (response.ok) {
-                // El usuario se ha registrado correctamente en el backend
                 const responseData = await response.json();
                 console.log('Registro en el backend exitoso:', responseData.message);
-                // Puedes realizar otras acciones aquí si es necesario
             } else {
-                // Error en el registro en el backend
                 const errorData = await response.json();
                 console.error('Error en el registro en el backend:', errorData.error);
             }

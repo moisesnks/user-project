@@ -52,6 +52,7 @@ func main() {
 	// Configura las rutas con Gin
 	routes.ConfigureRegisterRoute(r, authService) // Configura la ruta de registro
 	routes.ConfigureLoginRoute(r, authService)    // Configura la ruta de inicio de sesión
+	routes.ConfigureUserInfoRoute(r, authService) // Configura la ruta de información del usuario
 
 	// Configura y ejecuta tu servidor Gin aquí
 	port := ":8080"

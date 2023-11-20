@@ -2,11 +2,47 @@
 import React, { createContext, useContext, useState } from 'react';
 import { auth } from '../../firebase';
 import { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    // const navigate = useNavigate(); // Usa useNavigate en lugar de useHistory
+
+    const redirectToProfile = async (token) => {
+        try {
+            // Realizar una solicitud al backend para obtener el perfil del usuario
+            const response = await fetch('http://localhost:8080/user/info', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}` // Envía el token JWT en el encabezado
+                }
+            });
+
+            if (response.ok) {
+                // Procesar la respuesta del backend para obtener los datos del perfil del usuario
+                const userData = await response.json();
+                console.log('Datos del perfil del usuario:', userData);
+
+                // Redirige al usuario a la página '/profile' y pasa los datos del usuario
+                // redirectToProfilePage(userData);
+            } else {
+                console.error('Error en la solicitud al backend para obtener el perfil del usuario');
+            }
+        } catch (error) {
+            console.error('Error al obtener el perfil del usuario:', error.message);
+        }
+    };
+
+    // Función para redirigir a la página de perfil y pasar los datos del usuario
+    const redirectToProfilePage = (userData) => {
+        const navigate = useNavigate();
+
+        // Redirige a la página '/profile' y pasa los datos del usuario como estado
+        navigate('/profile', { state: { userData } });
+    };
+
 
     // Función de inicio de sesión que llama a 'signInWithEmailAndPassword' de Firebase Auth
     // Después de un inicio de sesión exitoso
@@ -29,6 +65,9 @@ export const AuthProvider = ({ children }) => {
                 // Procesar la respuesta del backend
                 const data = await response.json();
                 console.log('Respuesta del backend después del inicio de sesión:', data);
+
+                // Después de procesar la respuesta del backend, redirige al usuario a la página de perfil
+                redirectToProfile(token);
             } else {
                 console.error('Error en la solicitud al backend después del inicio de sesión');
             }

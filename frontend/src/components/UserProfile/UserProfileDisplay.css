@@ -1,0 +1,68 @@
+/* UserProfileDisplay.css */
+.user-profile-display {
+    padding: 20px;
+}
+
+.profile-image {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.custom-img {
+    width: 150px;
+    height: 150px;
+}
+
+.custom-icon {
+    font-size: 100px;
+    color: #6c757d;
+}
+
+.custom-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+    /* Color de título */
+}
+
+.custom-list {
+    padding: 0;
+}
+
+.custom-item {
+    background-color: transparent;
+    border: none;
+    font-size: 1rem;
+    color: #333;
+    /* Color del texto de la lista */
+}
+
+.custom-item {
+    position: relative;
+    /* Añade posición relativa para que el ícono de lápiz sea relativo a este elemento */
+    transition: background-color 0.3s ease;
+    /* Transición para el efecto hover */
+
+    /* Define el color de fondo por defecto y el color de fondo al hacer hover */
+    background-color: #ffffff;
+}
+
+.custom-item:hover {
+    background-color: #f0f0f0;
+    /* Cambia el color de fondo al hacer hover */
+}
+
+.edit-icon {
+    position: absolute;
+    /* Añade posición absoluta para el ícono de lápiz */
+    top: 50%;
+    /* Alinea verticalmente al centro */
+    right: 10px;
+    /* Alinea a la derecha */
+    transform: translateY(-50%);
+    /* Centra verticalmente */
+    cursor: pointer;
+    /* Cambia el cursor al puntero al pasar el mouse sobre el ícono */
+    color: #007bff;
+    /* Color del ícono de lápiz */
+}

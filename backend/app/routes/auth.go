@@ -6,6 +6,7 @@ import (
 	"backend/app/services"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,39 +38,28 @@ func ConfigureRegisterRoute(router *gin.Engine, authService *services.AuthServic
 // ConfigureLoginRoute configura la ruta de inicio de sesión
 func ConfigureLoginRoute(router *gin.Engine, authService *services.AuthService) {
 	router.POST("/auth/login", func(c *gin.Context) {
-		var requestBody map[string]interface{}
+		// Extraer el token del encabezado 'Authorization'
+		authHeader := c.GetHeader("Authorization")
 
-		// Leer el cuerpo de la solicitud como un mapa sin procesar
-		if err := c.BindJSON(&requestBody); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "JSON no válido"})
-			fmt.Println("Error al parsear el JSON desde el cuerpo de la solicitud:", err)
+		// Dividir el encabezado en el espacio ' '
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Encabezado de autorización mal formado o ausente"})
+			c.Error(fmt.Errorf("encabezado de autorización mal formado o ausente")) // Use c.Error to log the error
 			return
 		}
 
-		// Por ejemplo, para acceder a un campo específico:
-		token, ok := requestBody["token"].(string)
-		if !ok {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Token JWT no válido"})
-			fmt.Println("Token JWT no encontrado en el cuerpo de la solicitud")
-			return
-		}
+		// El token es la segunda parte del encabezado dividido
+		token := parts[1]
 
-		// Validar el token JWT utilizando el servicio de autenticación
-		isValid, err := authService.ValidateJWT(token)
+		// Extraer el UID del usuario del token JWT
+		uid, email, err := authService.ExtractUserDetailsFromToken(token)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al validar el token JWT"})
-			fmt.Println("Error al validar el token JWT:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al extraer detalles del token JWT"})
+			c.Error(err) // Use c.Error to log the error
 			return
 		}
-
-		fmt.Println("Token JWT is ", isValid)
-
-		if isValid {
-			// Enviar una respuesta HTTP 200 con un mensaje de éxito
-			c.JSON(http.StatusOK, gin.H{"message": "Inicio de sesión exitoso"})
-			return
-		} else {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token JWT no válido"})
-		}
+		c.JSON(http.StatusOK, gin.H{"message": "Inicio de sesión exitoso", "uid": uid, "email": email})
+		fmt.Printf("Inicio de sesión exitoso para el usuario con UID: %s, Email: %s\n", uid, email) // Use fmt.Printf to log success for debugging
 	})
 }

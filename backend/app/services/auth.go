@@ -1,35 +1,24 @@
 package services
 
 import (
+	"backend/app/models"
 	"context"
-	"database/sql"
 	"errors"
 	"log"
 	"time"
 
 	"firebase.google.com/go/auth"
+	"gorm.io/gorm"
 )
 
-// User representa la estructura de datos del usuario.
-type User struct {
-	ID              string
-	Nombre          string
-	Apellido        string
-	SegundoApellido string
-	Email           string
-	Rut             string
-	Fono            string
-	ImgProfile      string
-}
-
-// AuthService proporciona servicios relacionados con la autenticación y autorización.
+// AuthService provides authentication and authorization-related services.
 type AuthService struct {
 	FirebaseAuthClient *auth.Client
-	DB                 *sql.DB
+	DB                 *gorm.DB
 }
 
-// NewAuthService crea una nueva instancia de AuthService.
-func NewAuthService(firebaseAuthClient *auth.Client, db *sql.DB) *AuthService {
+// NewAuthService creates a new instance of AuthService.
+func NewAuthService(firebaseAuthClient *auth.Client, db *gorm.DB) *AuthService {
 	return &AuthService{
 		FirebaseAuthClient: firebaseAuthClient,
 		DB:                 db,
@@ -37,28 +26,30 @@ func NewAuthService(firebaseAuthClient *auth.Client, db *sql.DB) *AuthService {
 }
 
 func (s *AuthService) RegisterUser(uid, email string) error {
-	log.Println("Inicio de RegisterUser")
+	log.Println("Start RegisterUser")
 
-	// Verificar si el usuario ya está registrado en la base de datos
-	var existingUID string
-	err := s.DB.QueryRow("SELECT id FROM usuario WHERE id = $1", uid).Scan(&existingUID)
-	if err == nil {
-		log.Printf("El usuario con UID %s ya está registrado\n", uid)
-		return errors.New("El usuario ya está registrado")
-	} else if err != sql.ErrNoRows {
-		log.Printf("Error al verificar el usuario existente: %v\n", err)
+	// Check if the user is already registered in the database
+	var existingUser models.User
+	if err := s.DB.First(&existingUser, "id = ?", uid).Error; err == nil {
+		log.Printf("User with UID %s is already registered\n", uid)
+		return errors.New("User is already registered")
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.Printf("Error checking for existing user: %v\n", err)
 		return err
 	}
-	log.Println("El usuario no está registrado, procediendo a la inserción")
+	log.Println("User is not registered, proceeding with insertion")
 
-	// Insertar el usuario en la base de datos
-	_, err = s.DB.Exec("INSERT INTO usuario (id, email) VALUES ($1, $2)", uid, email)
-	if err != nil {
-		log.Printf("Error al insertar el usuario: %v\n", err)
+	// Insert the user into the database
+	newUser := models.User{
+		ID:    uid,
+		Email: email,
+	}
+	if err := s.DB.Create(&newUser).Error; err != nil {
+		log.Printf("Error inserting user: %v\n", err)
 		return err
 	}
 
-	log.Println("Usuario registrado con éxito")
+	log.Println("User registered successfully")
 	return nil
 }
 
@@ -92,24 +83,29 @@ func (s *AuthService) GetUserInfoByID(userID string) (map[string]interface{}, er
 			"CreationTimestamp":  time.Unix(user.UserMetadata.CreationTimestamp/1000, 0).Format("02 de enero de 2006"),
 			"LastLogInTimestamp": time.Unix(user.UserMetadata.LastLogInTimestamp/1000, 0).Format("02 de enero de 2006"),
 		},
-		"TenantID": user.TenantID,
 	}
 
 	return userData, nil
 }
 
-func (s *AuthService) ExtractUserIDFromToken(token string) (string, error) {
+func (s *AuthService) ExtractUserDetailsFromToken(token string) (string, string, error) {
 	// Realiza la verificación del token JWT
 	strToken, err := s.FirebaseAuthClient.VerifyIDToken(context.Background(), token)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	// Extraer el user_id del token JWT
-	user_id, ok := strToken.Claims["user_id"].(string)
-	if !ok || user_id == "" {
-		return "", errors.New("user_id no encontrado en el token JWT")
+	userID, ok := strToken.Claims["user_id"].(string)
+	if !ok || userID == "" {
+		return "", "", errors.New("user_id no encontrado en el token JWT")
 	}
 
-	return user_id, nil
+	// Extraer el email del token JWT
+	email, ok := strToken.Claims["email"].(string)
+	if !ok || email == "" {
+		return "", "", errors.New("email no encontrado en el token JWT")
+	}
+
+	return userID, email, nil
 }

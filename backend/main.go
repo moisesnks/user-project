@@ -1,7 +1,7 @@
 package main
 
 import (
-	backendConfig "backend/app/config"
+	"backend/app/config"
 	"backend/app/routes"
 	"backend/app/services"
 	"fmt"
@@ -20,17 +20,30 @@ func main() {
 		return
 	}
 
-	// Inicializa Firebase
-	err = backendConfig.InitFirebase() // Cambia esta línea
+	// Initialize the Firebase client
+	if err := config.InitFirebase(); err != nil {
+		fmt.Printf("Error initializing Firebase client: %v\n", err)
+		return
+	}
+
+	// Initalize the Storage client
+	if err := config.InitStorage(); err != nil {
+		fmt.Printf("Error initializing Storage client: %v\n", err)
+		return
+	}
+
+	// Inicializa Firebase (if needed)
+	err = config.InitFirebase() // Cambia esta línea
 	if err != nil {
 		fmt.Printf("Error initializing Firebase: %v\n", err)
 		return
 	}
 
 	// Inicializa la conexión a la base de datos PostgreSQL
-	backendConfig.InitDatabase()
-	db := backendConfig.DB
-	defer db.Close()
+	db := config.InitDatabase()
+
+	// Configura los servicios y controladores
+	authService := services.NewAuthService(config.FirebaseAuthClient, db)
 
 	// Crea una instancia de Gin
 	r := gin.Default()
@@ -40,14 +53,6 @@ func main() {
 	config.AllowOrigins = []string{"http://localhost:5173"}         // Agrega el puerto 5173 como origen permitido
 	config.AllowHeaders = []string{"Authorization", "Content-Type"} // Permite los encabezados "Authorization" y "Content-Type"
 	r.Use(cors.New(config))                                         // Aplica la configuración de CORS a tu router
-
-	// Configura los servicios y controladores
-	firebaseClient, err := backendConfig.GetFirebaseClient() // Usa la función GetFirebaseClient() de tu paquete config
-	if err != nil {
-		fmt.Printf("Error initializing Firebase client: %v\n", err)
-		return
-	}
-	authService := services.NewAuthService(firebaseClient, db)
 
 	// Configura las rutas con Gin
 	routes.ConfigureRegisterRoute(r, authService) // Configura la ruta de registro

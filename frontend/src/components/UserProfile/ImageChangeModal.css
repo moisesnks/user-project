@@ -1,0 +1,11 @@
+/* ImageChangeModal.css */
+.image-preview {
+    max-width: 100%;
+    /* Ancho máximo del 100% del contenedor */
+    max-height: 400px;
+    /* Altura máxima de 400px */
+    object-fit: contain;
+    /* Asegura que la imagen mantenga su relación de aspecto */
+    margin-bottom: 15px;
+    /* Espacio debajo de la imagen para separarla de otros elementos */
+}

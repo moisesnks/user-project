@@ -5,12 +5,13 @@ import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
 import './LoginRegisterForm.css';
 
-import ObtenerInfoPerfil from '../../api/perfil';
+import { ObtenerInfoPerfil } from '../../api/perfil';
+
 
 const LoginRegisterForm = () => {
     const [isLoginView, setIsLoginView] = useState(true);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('prueba@moises.cl');
+    const [password, setPassword] = useState('Nicolahh2');
     const { login, register, getToken } = useAuth();
     const navigate = useNavigate();
 
@@ -18,9 +19,9 @@ const LoginRegisterForm = () => {
     useEffect(() => {
         const token = getToken();
         if (token) {
-            ObtenerInfoPerfil(token, navigate);
+            ObtenerInfoPerfil(token);
         }
-    }, [getToken, navigate]);
+    }, [getToken]);
 
     const handleButtonClick = () => {
         setIsLoginView(!isLoginView);
@@ -30,6 +31,7 @@ const LoginRegisterForm = () => {
         e.preventDefault();
         if (isLoginView) {
             await login(email, password);
+            navigate('/profile');
         } else {
             await register(email, password);
         }

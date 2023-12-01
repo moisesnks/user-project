@@ -14,11 +14,11 @@ export const AuthProvider = ({ children }) => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (currentUser) {
                 const newToken = await currentUser.getIdToken();
-                Cookies.set('token', newToken, { domain: 'localhost' });
+                Cookies.set('tokenS', newToken, { domain: '.local' });
                 setToken(newToken);
                 setUser(currentUser);
             } else {
-                Cookies.remove('token', { domain: 'localhost' });
+                Cookies.remove('token', { domain: '.local' });
                 setToken(null);
                 setUser(null);
             }
@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const newToken = await userCredential.user.getIdToken();
-            Cookies.set('token', newToken, { domain: 'localhost' });
+            Cookies.set('token', newToken, { domain: '.local' });
             setToken(newToken);
             setUser(userCredential.user);
             await loginOnBackend(newToken);
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
     const logout = async () => {
         try {
             await signOut(auth);
-            Cookies.remove('token', { domain: 'localhost' });
+            Cookies.remove('token', { domain: '.local' });
             setToken(null);
             setUser(null);
         } catch (error) {

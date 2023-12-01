@@ -50,9 +50,9 @@ func main() {
 
 	// Configura CORS para permitir solicitudes desde el puerto 5173 y permitir el encabezado "Authorization"
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:5173"}         // Agrega el puerto 5173 como origen permitido
-	config.AllowHeaders = []string{"Authorization", "Content-Type"} // Permite los encabezados "Authorization" y "Content-Type"
-	r.Use(cors.New(config))                                         // Aplica la configuración de CORS a tu router
+	config.AllowOrigins = []string{"http://localhost:5173", "http://usuarios.local:5173", "http://agendamiento.local:5174"} // Agrega el puerto 5173 como origen permitido
+	config.AllowHeaders = []string{"Authorization", "Content-Type"}                                                         // Permite los encabezados "Authorization" y "Content-Type"
+	r.Use(cors.New(config))                                                                                                 // Aplica la configuración de CORS a tu router
 
 	// Configura las rutas con Gin
 	routes.ConfigureRegisterRoute(r, authService) // Configura la ruta de registro
